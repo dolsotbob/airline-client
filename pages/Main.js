@@ -8,23 +8,26 @@ import Debug from './component/Debug';
 
 import json from '../resource/flightList';
 
+
+// 아래 Main 컴포넌트는 전체 앱의 부모 컴포넌트로 여러 자식 컴포넌트를 포함함 
 export default function Main() {
   const [condition, setCondition] = useState({
     departure: 'ICN',
+    destination: '',
   });
   const [flightList, setFlightList] = useState(json);
 
+  //아래는 condition 상태를 업데이트하는 함수; 
+  // departure와 destination 값을 인자로 받아 setCondition을 통해 condition 상태 업데이트 
+  // search 컴포넌트에서 검색 버튼 클릭했을 때 호출됨 
   const search = ({ departure, destination }) => {
-    if (
-      condition.departure !== departure ||
-      condition.destination !== destination
-    ) {
-      console.log('condition 상태를 변경시킵니다');
-
-      // TODO:
-    }
+    setCondition({
+      departure, 
+      destination,
+    });
   };
 
+    //아래는 flightlist에 대해 필터링 하는 함수 
   const filterByCondition = (flight) => {
     let pass = true;
     if (condition.departure) {
@@ -47,7 +50,10 @@ export default function Main() {
 
       <main>
         <h1>여행가고 싶을 땐, Airline</h1>
-        <Search />
+
+        {/* Search 컴포넌트에 onSearch 함수 전달  */}
+        <Search onSearch={search} />
+
         <div className="table">
           <div className="row-header">
             <div className="col">출발</div>
