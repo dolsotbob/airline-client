@@ -15,29 +15,34 @@ export default function Main() {
     departure: 'ICN',
     destination: '',
   });
-  const [flightList, setFlightList] = useState(json);
+  const [flightList, setFlightList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  //아래는 condition 상태를 업데이트하는 함수; 
-  // departure와 destination 값을 인자로 받아 setCondition을 통해 condition 상태 업데이트 
-  // search 컴포넌트에서 검색 버튼 클릭했을 때 호출됨 
   const search = ({ departure, destination }) => {
-    setCondition({
-      departure, 
-      destination,
-    });
+    if (
+      condition.departure !== departure ||
+      condition.destination !== destination
+    ) { 
+    setCondition({ departure, destination });
+    }
   };
 
-    //아래는 flightlist에 대해 필터링 하는 함수 
-  const filterByCondition = (flight) => {
-    let pass = true;
-    if (condition.departure) {
-      pass = pass && flight.departure === condition.departure;
+  const handleFlight = async () => {
+    setIsLoading(true);
+
+    try {
+      const flightData = await getFlight(condition);
+      setFlightList(flightData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-    if (condition.destination) {
-      pass = pass && flight.destination === condition.destination;
-    }
-    return pass;
   };
+
+  useEffect(() => {
+      handleFlight();
+  }, [condition]);
 
   global.search = search; // 실행에는 전혀 지장이 없지만, 테스트를 위해 필요한 코드입니다. 이 코드는 지우지 마세요!
 
@@ -53,7 +58,6 @@ export default function Main() {
 
         {/* Search 컴포넌트에 onSearch 함수 전달  */}
         <Search onSearch={search} />
-
         <div className="table">
           <div className="row-header">
             <div className="col">출발</div>
@@ -62,8 +66,9 @@ export default function Main() {
             <div className="col">도착 시각</div>
             <div className="col"></div>
           </div>
-          <FlightList list={flightList.filter(filterByCondition)} />
-        </div>
+          
+        {isLoading ? <LoadingIndicator /> : <FlightList list={flightList} />}
+      </div>        
 
         <div className="debug-area">
           <Debug condition={condition} />
